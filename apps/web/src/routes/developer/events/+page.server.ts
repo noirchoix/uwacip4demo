@@ -1,0 +1,1 @@
+import type{PageServerLoad}from'./$types';import{api}from'$lib/api/client';export const load:PageServerLoad=async({fetch})=>{try{return{events:await api<unknown[]>(fetch,'/internal/pipe4/events')}}catch(e){return{events:[],error:e instanceof Error?e.message:'Unable to load event ledger'}}};

@@ -1,0 +1,1 @@
+import type{PageServerLoad}from'./$types';import{api}from'$lib/api/client';import{accessRequestSchema}from'$lib/schemas/pipe4';export const load:PageServerLoad=async({fetch})=>{try{return{rows:await api(fetch,'/pipe4/access-requests',undefined,accessRequestSchema.array())}}catch(e){return{rows:[],error:e instanceof Error?e.message:'Unable to load access requests'}}};
