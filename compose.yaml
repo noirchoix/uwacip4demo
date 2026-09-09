@@ -30,7 +30,7 @@ services:
       dockerfile: infra/docker/api.Dockerfile
     env_file: .env
     ports:
-      - "8000:8000"
+      - "${PIPE4_API_PORT:-8000}:8000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,8 +40,17 @@ services:
       - /bin/sh
       - -c
       - |
-        alembic upgrade head &&
-        uvicorn pipe4.app:app --host 0.0.0.0 --port 8000
+        attempt=0
+        until alembic upgrade head; do
+          attempt=$$((attempt + 1))
+          if [ "$$attempt" -ge 30 ]; then
+            echo "Database migration failed after 30 attempts" >&2
+            exit 1
+          fi
+          echo "Database migration attempt $$attempt failed; retrying in 2 seconds" >&2
+          sleep 2
+        done
+        exec uvicorn pipe4.app:app --host 0.0.0.0 --port 8000
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready')"]
       interval: 5s
@@ -86,7 +95,7 @@ services:
       PIPE4_WEB_DEV_MODE: "true"
       PIPE4_INTERNAL_API_TOKEN: ${PIPE4_INTERNAL_API_TOKEN:-}
     ports:
-      - "3000:3000"
+      - "${PIPE4_WEB_PORT:-3000}:3000"
     depends_on:
       api:
         condition: service_healthy
@@ -96,7 +105,7 @@ services:
     volumes:
       - ./infra/reverse-proxy/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
-      - "8080:80"
+      - "${PIPE4_GATEWAY_PORT:-8080}:80"
     depends_on:
       api:
         condition: service_healthy
