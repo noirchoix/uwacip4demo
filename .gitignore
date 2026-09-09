@@ -25,7 +25,7 @@ test-results/
 .env.*
 !.env.example
 data/
-evidence/
+/evidence/
 *.db
 *.sqlite*
 celerybeat-schedule*

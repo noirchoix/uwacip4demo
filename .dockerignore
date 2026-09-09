@@ -12,7 +12,7 @@
 **/dist
 **/.coverage
 data
-evidence
+/evidence/
 .env
 .env.*
 !.env.example
