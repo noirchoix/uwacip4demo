@@ -1,0 +1,142 @@
+--- a/src/features/pipe4/api/contracts.ts
++++ b/src/features/pipe4/api/contracts.ts
+@@ -40,12 +40,9 @@
+   lifecycle_status: Pipe4LifecycleStatus;
+   epistemic_status: Pipe4EpistemicStatus;
+   verification_status: Pipe4VerificationStatus;
+-  confidence: number;
++  confidence: number | null;
+   observed_at: string;
+-  expires_at: string;
+-  source_ids: string[];
+-  evidence_ids: string[];
+-  observation_ids: string[];
++  expires_at: string | null;
+   visibility: 'PUBLIC' | 'TARGETED' | 'PRIVATE' | 'INSTITUTIONAL' | 'INTERNAL';
+ }
+
+@@ -83,10 +80,12 @@
+ }
+
+ export type WatchStatus = 'ACTIVE' | 'ALERTING' | 'PAUSED';
++export type WatchOperator = 'eq' | 'ne' | 'lt' | 'lte' | 'gt' | 'gte' | 'changed_to';
++export type Pipe4WatchTarget = string | number | boolean | null;
+ export interface WatchCondition {
+   identity: Pipe4StateIdentity;
+-  operator: string;
+-  target: unknown;
++  operator: WatchOperator;
++  target: Pipe4WatchTarget;
+   field_path?: string;
+   decision_context?: string;
+   permission_tags?: string[];
+@@ -105,13 +104,22 @@
+ }
+
+ export type AccessRequestStatus = 'PENDING' | 'APPROVED' | 'DENIED' | 'REVOKED' | 'EXPIRED' | 'CANCELLED';
++export type AccessPermission = 'READ';
++export interface Pipe4AccessScope {
++  all_current_state: boolean;
++  identity_keys: string[];
++  state_types: Pipe4StateType[];
++  object_keys: string[];
++  field_paths: string[];
++}
+ export interface AccessRequest {
+   access_request_id: string;
+   requester_subject: string;
+   target_entity_id: string;
+   target_identity_key?: string | null;
+-  requested_permission: string;
+-  requested_scope: Record<string, unknown>;
++  requested_permission: AccessPermission;
++  requested_scope: Pipe4AccessScope;
++  approved_scope?: Pipe4AccessScope | null;
+   status: AccessRequestStatus;
+   requested_at: string;
+   decided_at?: string | null;
+--- a/src/features/pipe4/api/pipe4Api.ts
++++ b/src/features/pipe4/api/pipe4Api.ts
+@@ -3,9 +3,11 @@
+
+ import type {
+   AccessRequest,
++  type AccessPermission,
+   CurrentStatePresentation,
+   EntityResolutionResult,
+   NearbyStateResult,
++  Pipe4AccessScope,
+   Pipe4Entity,
+   Pipe4StateIdentity,
+   TargetedAcquisitionRequest,
+@@ -29,7 +31,7 @@
+
+ interface WitnessReportInput {
+   text: string;
+-  entity_id: string;
++  entity_id?: string;
+   object_key?: string;
+   observed_at?: string;
+   latitude?: number;
+@@ -38,6 +40,7 @@
+   location_description?: string;
+   idempotency_key?: string;
+   correlation_id?: string;
++  targeted_request_id?: string;
+ }
+
+ export const pipe4Api = baseApi.injectEndpoints({
+@@ -85,7 +88,15 @@
+       transformResponse: (response: ApiResponse<AccessRequest[]>) => unwrapApiResponse(response),
+       providesTags: ['Pipe4Access'],
+     }),
+-    createPipe4AccessRequest: builder.mutation<AccessRequest, { target_entity_id: string; target_identity_key?: string; requested_scope?: Record<string, unknown> }>({
++    createPipe4AccessRequest: builder.mutation<
++      AccessRequest,
++      {
++        target_entity_id: string;
++        target_identity_key?: string;
++        requested_scope?: Pipe4AccessScope;
++        requested_permission?: AccessPermission;
++      }
++    >({
+       query: (body) => ({ url: '/pipe4/access-requests', method: 'POST', body }),
+       transformResponse: (response: ApiResponse<AccessRequest>) => unwrapApiResponse(response),
+       invalidatesTags: ['Pipe4Access'],
+--- a/src/features/pipe4/api/witnessAudioUpload.ts
++++ b/src/features/pipe4/api/witnessAudioUpload.ts
+@@ -6,7 +6,7 @@
+
+ export interface WitnessAudioUploadInput {
+   uri: string;
+-  entityId: string;
++  entityId?: string;
+   objectKey: string;
+   observedAt: string;
+   latitude?: number;
+@@ -14,6 +14,7 @@
+   locationAccuracyM?: number;
+   locationDescription?: string;
+   correlationId?: string;
++  targetedRequestId?: string;
+ }
+
+ export async function uploadPipe4WitnessAudio(input: WitnessAudioUploadInput): Promise<unknown> {
+@@ -21,15 +22,16 @@
+   const headers: Record<string, string> = { Accept: 'application/json' };
+   if (token) headers.Authorization = `Bearer ${token}`;
+   const parameters: Record<string, string> = {
+-    entity_id: input.entityId,
+     object_key: input.objectKey,
+     observed_at: input.observedAt,
+   };
++  if (input.entityId) parameters.entity_id = input.entityId;
+   if (input.latitude != null) parameters.latitude = String(input.latitude);
+   if (input.longitude != null) parameters.longitude = String(input.longitude);
+   if (input.locationAccuracyM != null) parameters.location_accuracy_m = String(input.locationAccuracyM);
+   if (input.locationDescription) parameters.location_description = input.locationDescription;
+   if (input.correlationId) parameters.correlation_id = input.correlationId;
++  if (input.targetedRequestId) parameters.targeted_request_id = input.targetedRequestId;
+
+   if (Platform.OS === 'web') {
+     const source = await fetch(input.uri);

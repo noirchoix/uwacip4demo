@@ -1,36 +1,34 @@
 # Python
 __pycache__/
 *.py[cod]
-*.egg-info/
+*.pyo
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+
+# Coverage
 .coverage
+.coverage.*
+coverage.xml
 htmlcov/
+
+# Virtual environments
 .venv/
 venv/
-dist/
-build/
+env/
 
-# Node
-node_modules/
-.svelte-kit/
-apps/web/build/
-apps/web/.svelte-kit/
-playwright-report/
-test-results/
-
-# Runtime
+# Local environment
 .env
 .env.*
 !.env.example
-data/
-/evidence/
-*.db
-*.sqlite*
-celerybeat-schedule*
 
-# IDE/OS
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# IDE / OS
 .vscode/
 .idea/
 .DS_Store

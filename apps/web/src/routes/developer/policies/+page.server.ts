@@ -1,1 +1,0 @@
-import type{PageServerLoad}from'./$types';import{api}from'$lib/api/client';export const load:PageServerLoad=async({fetch})=>{try{return{policy:await api<unknown>(fetch,'/internal/pipe4/policies')}}catch(e){return{policy:null,error:e instanceof Error?e.message:'Unable to load policy'}}};

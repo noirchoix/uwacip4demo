@@ -1,1 +1,0 @@
-<script lang="ts">let{data}=$props();</script><div class="page"><header class="page-head"><div><h1>Active policy</h1><p>Confidence, freshness, contradiction and ranking behavior is versioned and inspectable.</p></div></header>{#if data.error}<p class="error">{data.error}</p>{/if}<div class="surface"><pre class="technical">{JSON.stringify(data.policy,null,2)}</pre></div></div>
