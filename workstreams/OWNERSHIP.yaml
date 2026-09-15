@@ -1,0 +1,43 @@
+team_lead: Samuel
+workstreams:
+  victory_azundo:
+    owns:
+      - app/modules/current_state/api/**
+      - app/modules/current_state/adapters/**
+      - app/modules/current_state/services/witness*.py
+      - app/modules/current_state/services/access*.py
+      - app/modules/current_state/services/acquisition*.py
+    coordinates_with: [Ibrahim, Jacob, Ernest, RoboTech]
+  ibrahim:
+    owns:
+      - app/modules/current_state/domain/**
+      - app/modules/current_state/services/resolution.py
+      - app/modules/current_state/services/presentation.py
+    exception_notes:
+      - RoboTech is primary owner for domain/nearby.py and domain/watch.py.
+    coordinates_with: [Victory Azundo, Ernest, RoboTech]
+  ernest:
+    owns:
+      - app/modules/current_state/models/**
+      - app/modules/current_state/repositories/**
+      - migrations/versions/*pipe4*
+    coordinates_with: [Ibrahim, Jacob, RoboTech]
+  jacob:
+    owns:
+      - app/modules/current_state/schemas/**
+      - tests/contract/*pipe4*
+      - docs/implementation/PIPE4_MVP_PROGRESS.md
+    coordinates_with: [Victory Azundo, Ernest, RoboTech]
+  robotech:
+    owns:
+      - app/modules/current_state/domain/nearby.py
+      - app/modules/current_state/domain/watch.py
+      - app/modules/current_state/services/nearby.py
+      - app/modules/current_state/services/watch.py
+      - tests/**/*nearby*
+      - tests/**/*watch*
+    coordinates_with: [Ibrahim, Ernest, Jacob, Victory Azundo]
+notes:
+  - "Ownership indicates primary coordination responsibility, not permission to bypass review."
+  - "Specific file ownership overrides broader directory guidance in workstream READMEs."
+  - "Shared interface changes require Samuel review."

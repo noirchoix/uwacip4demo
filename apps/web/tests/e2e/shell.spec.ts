@@ -1,1 +1,0 @@
-import{test,expect}from'@playwright/test';test('renders current reality shell',async({page})=>{await page.goto('/');await expect(page.getByText('What is true now?')).toBeVisible();await expect(page.getByText('Pipe 4 · Current Reality')).toBeVisible()});

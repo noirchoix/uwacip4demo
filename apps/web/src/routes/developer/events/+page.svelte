@@ -1,1 +1,0 @@
-<script lang="ts">let{data}=$props();</script><div class="page"><header class="page-head"><div><h1>Event ledger</h1><p>Developer-only event inspection. Events are not the canonical database.</p></div></header>{#if data.error}<p class="error">{data.error}</p>{/if}<div class="surface"><pre class="technical">{JSON.stringify(data.events,null,2)}</pre></div></div>

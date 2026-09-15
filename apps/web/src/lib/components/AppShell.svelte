@@ -1,2 +1,0 @@
-<script lang="ts">type Props={children:import('svelte').Snippet};let{children}:Props=$props();const nav=[['/','Reality'],['/nearby','Nearby'],['/following','Following'],['/report','Report'],['/access','Access'],['/requests','Requests']];</script>
-<div class="app-shell"><aside><a class="brand" href="/"><span>U</span><strong>Uwaci</strong></a><p>Pipe 4 · Current Reality</p><nav>{#each nav as item}<a href={item[0]}>{item[1]}</a>{/each}</nav><a class="dev" href="/developer">Developer workspace</a></aside><main>{@render children()}</main></div>
